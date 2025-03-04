@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, url_for
 import os
 import time
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads'
-FILENAME = 'image.jpg'  # Fixed filename to ensure URL never changes
+FILENAME = 'image.jpg'  # Fixed filename
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure the upload folder exists
@@ -23,13 +23,17 @@ def index():
 
         if file:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], FILENAME)
-            file.save(file_path)  # Overwrites the old file
+            file.save(file_path)  # Overwrites old file
 
-    # Append a timestamp to prevent caching issues
+    # Append timestamp to prevent caching issues
     timestamp = int(time.time())
     image_url = url_for('static', filename=f'uploads/{FILENAME}') + f"?v={timestamp}"
 
     return render_template('index.html', image_url=image_url)
+
+# This is required for Vercel
+def handler(event, context):
+    return app(event, context)
 
 if __name__ == '__main__':
     app.run(debug=True)
